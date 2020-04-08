@@ -20,6 +20,11 @@ var svgArea = d3.select("body").select("svg");
     left: 50
   };
 
+  var labelspair ={"poverty": "Poverty (%)","age":"Age (Median)",
+                  "income":"Household Income (Median)","healthcare":"Lacks Healthcare (%)",
+                "smokes":"Smokes (%)","obesity":"Obesity (%)"}
+
+  
   var height = svgHeight - margin.top - margin.bottom;
   var width = svgWidth - margin.left - margin.right;
 
@@ -38,14 +43,6 @@ function createScale(jData,axisName)
   return currentLinearScale;
 }
 
-// var xLinearScale = d3.scaleLinear()
-//    .domain([d3.min(jData, d => d[currentX]*.2),d3.max(jData, d => d[currentX]*1.2)])
-//    .range([0, width]);
-
-//  var yLinearScale = d3.scaleLinear()
-//    .domain([d3.min(jData, d => d[currentY]*.2), d3.max(jData, d => d[currentY]*1.2)])
-//    .range([height, 0]);
-
   // Append SVG element
   var svg = d3
     .select("#scatter")
@@ -57,6 +54,10 @@ function createScale(jData,axisName)
   // Append group element
   var chartGroup = svg.append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+  var labelsGroup = chartGroup.append("g")
+    .attr("transform", `translate(${width / 2}, ${height + 20})`);
+
 
 function updateChart(jData,currentX,currentY,xLinearScale,yLinearScale){
 
@@ -90,7 +91,35 @@ function updateText(jData,currentX,currentY,currentText,xLinearScale,yLinearScal
   return TextGroup;
 }
 
+function setLabel(skey,axis){
+var svalue, degrees,x,y;
+  Object.entries(labelspair).forEach(([key,value])=>{
+    if (skey ==key)
+    {
+      svalue =value;
+    }
+  })
+  if (axis=="X"){
+    degrees = 0;
+    x=0
+    y=20
+  }
+  else{
+    degrees=-90;
+    x=(margin.left) * 2.5
+    y=0 - (height - 40);
+  }
+  var currentLabel = labelsGroup.append("text")
+  .attr("transform", "rotate("+degrees+")")
+  .attr("x", x)
+  .attr("y", y)
+  .attr("value", skey) // value to grab for event listener.
+  .classed("active", true)
+  .text(svalue);
 
+  return currentLabel;
+
+}
 
 d3.csv("D3_data_journalism/assets/data/data.csv").then(function(jData) {
   
@@ -126,6 +155,9 @@ updateChart(jData,currentX,currentY,xLinearScale,yLinearScale);
 updateText(jData,currentX,currentY,currentText,xLinearScale,yLinearScale);
 
 
+
+setLabel(currentX,"X");
+setLabel(currentY,"Y");
   // var toolTip = d3.tip()
   //       .attr("class", "tooltip")
   //       .offset([80, -60])
