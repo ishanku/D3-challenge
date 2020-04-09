@@ -11,22 +11,20 @@ var svgArea = d3.select("body").select("svg");
   // var svgHeight = window.innerHeight;
 
   var svgWidth = 900;
-  var svgHeight = 550;
+  var svgHeight = 600;
 
   var margin = {
     top: 50,
-    bottom: 50,
+    bottom: 100,
     right: 50,
-    left: 50
+    left: 110
   };
-
-  var labelspair ={"poverty": "Poverty (%)","age":"Age (Median)",
-                  "income":"Household Income (Median)","healthcare":"Lacks Healthcare (%)",
-                "smokes":"Smokes (%)","obesity":"Obesity (%)"}
-
+var labelspair={"poverty": "Poverty (%)","age":"Age (Median)","income":"Household Income (Median)","healthcare":"Lacks Healthcare (%)","smokes":"Smokes (%)","obesity":"Obesity (%)"}
+var Xlabelspair ={"poverty": "Poverty (%)","age":"Age (Median)","income":"Household Income (Median)"}
+var Ylabelspair={"healthcare":"Lacks Healthcare (%)","smokes":"Smokes (%)","obesity":"Obesity (%)"}
   
-  var height = svgHeight - margin.top - margin.bottom;
-  var width = svgWidth - margin.left - margin.right;
+var height = svgHeight - margin.top - margin.bottom;
+var width = svgWidth - margin.left - margin.right;
 
   var currentX="poverty";
   var currentY="healthcare";
@@ -37,7 +35,7 @@ var svgArea = d3.select("body").select("svg");
 function createScale(jData,axisName)
 {
   var currentLinearScale = d3.scaleLinear()
-   .domain([d3.min(jData, d => d[axisName]*.5),d3.max(jData, d => d[axisName]*1.5)])
+   .domain([d3.min(jData, d => d[axisName]*0.9),d3.max(jData, d => d[axisName]*1.6)])
    .range([0, width]);
 
   return currentLinearScale;
@@ -49,7 +47,6 @@ function createScale(jData,axisName)
     .append("svg")
     .attr("height", svgHeight)
     .attr("width", svgWidth);
-
 
   // Append group element
   var chartGroup = svg.append("g")
@@ -91,7 +88,7 @@ function updateText(jData,currentX,currentY,currentText,xLinearScale,yLinearScal
   return TextGroup;
 }
 
-function setLabel(skey,axis){
+function setLabel(skey,axis,i,akey){
 var svalue, degrees,x,y;
   Object.entries(labelspair).forEach(([key,value])=>{
     if (skey ==key)
@@ -102,24 +99,56 @@ var svalue, degrees,x,y;
   if (axis=="X"){
     degrees = 0;
     x=0
-    y=20
+    y=(i+1)*20
   }
   else{
     degrees=-90;
     x=(margin.left) * 2.5
-    y=0 - (height - 40);
+    
+    y=0 - (height - i*20);
+    console.log("i-"+i+"-y-"+y)
   }
   var currentLabel = labelsGroup.append("text")
   .attr("transform", "rotate("+degrees+")")
   .attr("x", x)
   .attr("y", y)
   .attr("value", skey) // value to grab for event listener.
-  .classed("active", true)
   .text(svalue);
+
+  if (akey==skey)
+    currentLabel.classed("active", true);
+  else if (akey == null)
+  {
+    if (i==0)
+      currentLabel.classed("active", false);
+    if (i==3)
+      currentLabel.classed("active", false);
+  }
+  else
+    currentLabel.classed("active", false);
 
   return currentLabel;
 
 }
+
+function populateLabels(akey){
+  var i=0;
+  Object.keys(Xlabelspair).forEach((key)=>{
+    setLabel(key,"X",i,akey)
+    i++
+   });
+
+Object.keys(Ylabelspair).forEach((key)=>{
+  setLabel(key,"Y",i,akey)
+  i--
+});
+}
+labelsGroup.selectAll("text")
+    .on("click", function() {
+      var clickedvalue = d3.select(this).attr("value");
+      alert(clickedvalue);
+      populateLabels(clickedvalue);
+    });
 
 d3.csv("D3_data_journalism/assets/data/data.csv").then(function(jData) {
   
@@ -155,9 +184,8 @@ updateChart(jData,currentX,currentY,xLinearScale,yLinearScale);
 updateText(jData,currentX,currentY,currentText,xLinearScale,yLinearScale);
 
 
+populateLabels(null)
 
-setLabel(currentX,"X");
-setLabel(currentY,"Y");
   // var toolTip = d3.tip()
   //       .attr("class", "tooltip")
   //       .offset([80, -60])
