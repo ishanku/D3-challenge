@@ -1,36 +1,17 @@
-var svgArea = d3.select("body").select("svg");
-
-  // clear svg is not empty
-  if (!svgArea.empty()) {
-    svgArea.remove();
-  }
-
-  // SVG wrapper dimensions are determined by the current width and
-  // height of the browser window.
-  // var svgWidth = window.innerWidth;
-  // var svgHeight = window.innerHeight;
-
-  var svgWidth = 900;
-  var svgHeight = 600;
-
-  var margin = {
-    top: 50,
-    bottom: 100,
-    right: 50,
-    left: 110
-  };
-var labelspair={"poverty": "Poverty (%)","age":"Age (Median)","income":"Household Income (Median)","healthcare":"Lacks Healthcare (%)","smokes":"Smokes (%)","obesity":"Obesity (%)"}
-var Xlabelspair ={"poverty": "Poverty (%)","age":"Age (Median)","income":"Household Income (Median)"}
-var Ylabelspair={"healthcare":"Lacks Healthcare (%)","smokes":"Smokes (%)","obesity":"Obesity (%)"}
+// Create SVG and ChartGroup
+function createChart(){
   
-var height = svgHeight - margin.top - margin.bottom;
-var width = svgWidth - margin.left - margin.right;
+  var svg = d3
+  .select("#scatter")
+  .append("svg")
+  .attr("height", svgHeight)
+  .attr("width", svgWidth);
 
-  var currentX="poverty";
-  var currentY="healthcare";
-  var currentText = "abbr";
+  var chartGroup = svg.append("g")
+  .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-
+  return chartGroup;
+}
 // create scales
 function createScale(jData,axisName)
 {
@@ -39,24 +20,31 @@ function createScale(jData,axisName)
    .range([0, width]);
 
   return currentLinearScale;
+};
+function createAxis(chartGroup,xLinearScale,yLinearScale){
+    // create axes
+  if (xLinearScale){
+  var xAxis = d3.axisBottom(xLinearScale);
+  chartGroup.append("g")
+  .attr("transform", `translate(0, ${height})`)
+  .call(xAxis);
+  return xAxis;}
+  if(yLinearScale){
+  var yAxis = d3.axisLeft(yLinearScale).ticks(6);;
+
+    chartGroup.append("g")
+  .call(yAxis);
+    return yAxis;
+  }
+  
 }
-
-  // Append SVG element
-  var svg = d3
-    .select("#scatter")
-    .append("svg")
-    .attr("height", svgHeight)
-    .attr("width", svgWidth);
-
-  // Append group element
-  var chartGroup = svg.append("g")
-    .attr("transform", `translate(${margin.left}, ${margin.top})`);
-
+function createLabelsGroup(chartGroup){
   var labelsGroup = chartGroup.append("g")
-    .attr("transform", `translate(${width / 2}, ${height + 20})`);
+  .attr("transform", `translate(${width / 2}, ${height + 20})`);
 
-
-function updateChart(jData,currentX,currentY,xLinearScale,yLinearScale){
+  return labelsGroup;
+}
+function updateChart(chartGroup,jData,currentX,currentY,xLinearScale,yLinearScale){
 
   var circlesGroup = chartGroup.selectAll("circle")
   .data(jData)
@@ -72,7 +60,7 @@ function updateChart(jData,currentX,currentY,xLinearScale,yLinearScale){
 
   return circlesGroup
 }
-function updateText(jData,currentX,currentY,currentText,xLinearScale,yLinearScale){
+function updateText(chartGroup,jData,currentX,currentY,currentText,xLinearScale,yLinearScale){
   var TextGroup = chartGroup.selectAll()
   .data(jData)
   .enter()
@@ -87,15 +75,14 @@ function updateText(jData,currentX,currentY,currentText,xLinearScale,yLinearScal
 
   return TextGroup;
 }
-
-function setLabel(skey,axis,i,akey){
-var svalue, degrees,x,y;
-  Object.entries(labelspair).forEach(([key,value])=>{
-    if (skey ==key)
-    {
-      svalue =value;
-    }
-  })
+function setLabel(labelsGroup,SelectedKey,axis,i,akey){
+  var SelectedKeyValue, degrees,x,y;
+                  Object.entries(labelspair).forEach(([key,value])=>{
+                    if (SelectedKey ==key)
+                    {
+                      SelectedKeyValue =value;
+                    }
+                  })
   if (axis=="X"){
     degrees = 0;
     x=0
@@ -106,55 +93,58 @@ var svalue, degrees,x,y;
     x=(margin.left) * 2.5
     
     y=0 - (height - i*20);
-    console.log("i-"+i+"-y-"+y)
   }
   var currentLabel = labelsGroup.append("text")
   .attr("transform", "rotate("+degrees+")")
   .attr("x", x)
   .attr("y", y)
-  .attr("value", skey) // value to grab for event listener.
-  .text(svalue);
+  .attr("value", SelectedKey) // value to grab for event listener.
+  .text(SelectedKeyValue);
 
-  if (akey==skey)
-    currentLabel.classed("active", true);
-  else if (akey == null)
-  {
-    if (i==0)
-      currentLabel.classed("active", false);
-    if (i==3)
-      currentLabel.classed("active", false);
-  }
-  else
-    currentLabel.classed("active", false);
+        if (akey==SelectedKey){
+              currentLabel.classed("active", true);
+              currentLabel.classed("inactive", false);
+        }
+        else if (akey == null)
+        {
+            if (i==0)
+              {
+                currentLabel.classed("active", true);
+                currentLabel.classed("inactive", false);
+              }
+            if (i==3)
+              {
+                currentLabel.classed("active", true);
+                currentLabel.classed("inactive", false);
+              }
+          }
+        else
+          {
+            currentLabel.classed("active", false);
+            currentLabel.classed("inactive", true);
+          }
 
   return currentLabel;
-
 }
 
-function populateLabels(akey){
+function populateLabels(labelsGroup,akey){
   var i=0;
   Object.keys(Xlabelspair).forEach((key)=>{
-    setLabel(key,"X",i,akey)
+    setLabel(labelsGroup,key,"X",i,akey)
     i++
+
    });
 
 Object.keys(Ylabelspair).forEach((key)=>{
-  setLabel(key,"Y",i,akey)
+  setLabel(labelsGroup,key,"Y",i,akey)
   i--
 });
 }
-labelsGroup.selectAll("text")
-    .on("click", function() {
-      var clickedvalue = d3.select(this).attr("value");
-      alert(clickedvalue);
-      populateLabels(clickedvalue);
-    });
+function getData(){
 
 d3.csv("D3_data_journalism/assets/data/data.csv").then(function(jData) {
-  
-  var xLinearScale = createScale(jData,currentX);
-  var yLinearScale = createScale(jData,currentY);
 
+  
 
   jData.forEach(function(data) {
     data.poverty = +data.poverty;
@@ -164,42 +154,28 @@ d3.csv("D3_data_journalism/assets/data/data.csv").then(function(jData) {
     data.smokes = +data.smokes;
     data.obesity = +data.obesity;
   });
-
- 
-
-  // create axes
-  var xAxis = d3.axisBottom(xLinearScale).ticks(6);
-  var yAxis = d3.axisLeft(yLinearScale).ticks(6);;
-
-
-chartGroup.append("g")
-  .attr("transform", `translate(0, ${height})`)
-  .call(xAxis);
-
-chartGroup.append("g")
-  .call(yAxis);
-
-
-updateChart(jData,currentX,currentY,xLinearScale,yLinearScale);
-updateText(jData,currentX,currentY,currentText,xLinearScale,yLinearScale);
-
-
-populateLabels(null)
-
-  // var toolTip = d3.tip()
-  //       .attr("class", "tooltip")
-  //       .offset([80, -60])
-  //       .html(function(d) {
-  //         return (`<strong>${d.abbr}<strong><hr>${d.poverty}
-  //         medal(s) won`);
-  //       });
-
-  // circlesGroup.on("mouseover", function(d) {
-  //   toolTip.show(d, this);
-  // })
-  // // Step 4: Create "mouseout" event listener to hide tooltip
-  //   .on("mouseout", function(d) {
-  //     toolTip.hide(d);
-  //   });
-
 });
+return jData;
+}
+function findObject(clickedvalue){
+var i=0;
+Object.keys(labelspair).forEach((key)=>{
+  if(key==clickedvalue){
+    Object.entries(iPair).forEach(([key,value])=>{
+        if (key == i){
+          axisI=value;
+        }
+    })
+  }
+  i++;
+})
+var j=0
+Object.keys(labelspair).forEach((key)=>{
+  if (j==axisI){
+    pairAxis=key;
+  }
+});
+return pairAxis;
+}
+//function onClickNow(labelsGroup,chartGroup){
+//}
