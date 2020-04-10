@@ -34,20 +34,18 @@ function handeBuild(currentX,currentY){
             if(clickedvalue==key)
                 {
 
-                    currentX=clickedvalue
-                    currentY=PairAxis
-                    alert(currentX+","+currentY);
-                    handeBuild(currentX,currentY)
+                    currentX=clickedvalue;
+                    currentY=PairAxis;
+                    handeBuild(currentX,currentY);
                 }
         })
         Object.keys(Ylabelspair).forEach((key)=>{
             if(clickedvalue==key)
                 {
 
-                    currentY=clickedvalue
-                    currentX=PairAxis
-                    alert(currentX+","+currentY);
-                    handeBuild(currentX,currentY)
+                    currentY=clickedvalue;
+                    currentX=PairAxis;
+                    handeBuild(currentX,currentY);
                 }
         })
        
