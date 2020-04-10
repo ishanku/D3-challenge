@@ -80,12 +80,12 @@ function createLabelsGroup(chartGroup){
   
     return labelsGroup;
 }
-function setLabel(labelsGroup,SelectedKey,axis,i,akey){
-    var SelectedKeyValue, degrees,x,y;
+function setLabel(labelsGroup,CurrentKey,axis,i,ActiveKey){
+    var CurrentKeyValue, degrees,x,y;
                     Object.entries(labelspair).forEach(([key,value])=>{
-                      if (SelectedKey ==key)
+                      if (CurrentKey ==key)
                       {
-                        SelectedKeyValue =value;
+                        CurrentKeyValue =value;
                       }
                     })
     if (axis=="X"){
@@ -103,17 +103,16 @@ function setLabel(labelsGroup,SelectedKey,axis,i,akey){
     .attr("transform", "rotate("+degrees+")")
     .attr("x", x)
     .attr("y", y)
-    .attr("value", SelectedKey) // value to grab for event listener.
-    .text(SelectedKeyValue);
+    .attr("value", CurrentKey) // value to grab for event listener.
+    .text(CurrentKeyValue);
     
-    console.log(SelectedKey);
-    console.log(SelectedKeyValue);
-          if (akey==SelectedKey){
-              console.log("a="+akey);
+    
+          if (ActiveKey==CurrentKey){
+              console.log("a="+ActiveKey);
                 currentLabel.classed("active", true);
                 currentLabel.classed("inactive", false);
           }
-          else if (akey == null)
+          else if (ActiveKey == null)
           {
               if (i==0)
                 {
@@ -131,20 +130,19 @@ function setLabel(labelsGroup,SelectedKey,axis,i,akey){
               currentLabel.classed("active", false);
               currentLabel.classed("inactive", true);
             }
-  
-    return currentLabel;
+
   }
   
-function populateLabels(labelsGroup,akey){
+function populateLabels(labelsGroup,currentX,currentY){
     var i=0;
     Object.keys(Xlabelspair).forEach((key)=>{
-      setLabel(labelsGroup,key,"X",i,akey)
+      setLabel(labelsGroup,key,"X",i,currentX)
       i++
   
      });
   
   Object.keys(Ylabelspair).forEach((key)=>{
-    setLabel(labelsGroup,key,"Y",i,akey)
+    setLabel(labelsGroup,key,"Y",i,currentY)
     i--
   });
   }

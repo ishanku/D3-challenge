@@ -24,7 +24,7 @@ function handeBuild(currentX,currentY){
         updateText(chartGroup,jData,currentX,currentY,currentText,xLinearScale,yLinearScale);
         
         var labelsGroup=createLabelsGroup(chartGroup);
-        populateLabels(labelsGroup)
+        populateLabels(labelsGroup,currentX,currentY)
         
         labelsGroup.selectAll("text")
         .on("click", function() {
