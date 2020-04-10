@@ -1,181 +1,60 @@
-// Create SVG and ChartGroup
-function createChart(){
-  
-  var svg = d3
-  .select("#scatter")
-  .append("svg")
-  .attr("height", svgHeight)
-  .attr("width", svgWidth);
+function handeBuild(currentX,currentY){
+    var svgArea = d3.select("body").select("svg");
+    if (!svgArea.empty()) {
+        svgArea.remove();
+      }
+    console.clear();
+    d3.csv("D3_data_journalism/assets/data/data.csv").then(function(jData) {    
+        jData.forEach(function(data) {
+        data.poverty = +data.poverty;
+        data.healthcare = +data.healthcare;
+        data.age = +data.age;
+        data.income = +data.income;
+        data.smokes = +data.smokes;
+        data.obesity = +data.obesity;
+        });
+       
+        
+        var chartGroup = createChart();
+        var xLinearScale=createScale(jData,currentX)
+        var yLinearScale=createScale(jData,currentY)
+        createAxis(chartGroup,xLinearScale,null);
+        createAxis(chartGroup,null,yLinearScale);
+        updateChart(chartGroup,jData,currentX,currentY,xLinearScale,yLinearScale);
+        updateText(chartGroup,jData,currentX,currentY,currentText,xLinearScale,yLinearScale);
+        
+        var labelsGroup=createLabelsGroup(chartGroup);
+        populateLabels(labelsGroup)
+        
+        labelsGroup.selectAll("text")
+        .on("click", function() {
+        var clickedvalue = d3.select(this).attr("value");
+        var PairAxis=findObject(clickedvalue)
+        Object.keys(Xlabelspair).forEach((key)=>{
+            if(clickedvalue==key)
+                {
 
-  var chartGroup = svg.append("g")
-  .attr("transform", `translate(${margin.left}, ${margin.top})`);
+                    currentX=clickedvalue
+                    currentY=PairAxis
+                    alert(currentX+","+currentY);
+                    handeBuild(currentX,currentY)
+                }
+        })
+        Object.keys(Ylabelspair).forEach((key)=>{
+            if(clickedvalue==key)
+                {
 
-  return chartGroup;
-}
-// create scales
-function createScale(jData,axisName)
-{
-  var currentLinearScale = d3.scaleLinear()
-   .domain([d3.min(jData, d => d[axisName]*0.9),d3.max(jData, d => d[axisName]*1.6)])
-   .range([0, width]);
+                    currentY=clickedvalue
+                    currentX=PairAxis
+                    alert(currentX+","+currentY);
+                    handeBuild(currentX,currentY)
+                }
+        })
+       
+        //handeBuild(currentX,currentY)        
+        });
 
-  return currentLinearScale;
-};
-function createAxis(chartGroup,xLinearScale,yLinearScale){
-    // create axes
-  if (xLinearScale){
-  var xAxis = d3.axisBottom(xLinearScale);
-  chartGroup.append("g")
-  .attr("transform", `translate(0, ${height})`)
-  .call(xAxis);
-  return xAxis;}
-  if(yLinearScale){
-  var yAxis = d3.axisLeft(yLinearScale).ticks(6);;
-
-    chartGroup.append("g")
-  .call(yAxis);
-    return yAxis;
-  }
-  
-}
-function createLabelsGroup(chartGroup){
-  var labelsGroup = chartGroup.append("g")
-  .attr("transform", `translate(${width / 2}, ${height + 20})`);
-
-  return labelsGroup;
-}
-function updateChart(chartGroup,jData,currentX,currentY,xLinearScale,yLinearScale){
-
-  var circlesGroup = chartGroup.selectAll("circle")
-  .data(jData)
-  .enter()
-  .append("circle")
-  .attr("cx", d => xLinearScale(d[currentX]))
-  .attr("cy", d => yLinearScale(d[currentY]))
-  .attr("r", "10")
-  .attr("fill", "gold")
-  .attr("stroke-width", "1")
-  .attr("stroke", "black")
-  .attr("opacity", ".9");
-
-  return circlesGroup
-}
-function updateText(chartGroup,jData,currentX,currentY,currentText,xLinearScale,yLinearScale){
-  var TextGroup = chartGroup.selectAll()
-  .data(jData)
-  .enter()
-  .append("text")
-  .text(d => (d[currentText]))
-  .attr("x", d => xLinearScale(d[currentX]))
-  .attr("y", d => yLinearScale(d[currentY]))
-  .style("font-size", "11px")
-  .style("text-anchor", "middle")
-  .style('fill', 'black')
-  .attr("opacity", ".5");
-
-  return TextGroup;
-}
-function setLabel(labelsGroup,SelectedKey,axis,i,akey){
-  var SelectedKeyValue, degrees,x,y;
-                  Object.entries(labelspair).forEach(([key,value])=>{
-                    if (SelectedKey ==key)
-                    {
-                      SelectedKeyValue =value;
-                    }
-                  })
-  if (axis=="X"){
-    degrees = 0;
-    x=0
-    y=(i+1)*20
-  }
-  else{
-    degrees=-90;
-    x=(margin.left) * 2.5
-    
-    y=0 - (height - i*20);
-  }
-  var currentLabel = labelsGroup.append("text")
-  .attr("transform", "rotate("+degrees+")")
-  .attr("x", x)
-  .attr("y", y)
-  .attr("value", SelectedKey) // value to grab for event listener.
-  .text(SelectedKeyValue);
-
-        if (akey==SelectedKey){
-              currentLabel.classed("active", true);
-              currentLabel.classed("inactive", false);
-        }
-        else if (akey == null)
-        {
-            if (i==0)
-              {
-                currentLabel.classed("active", true);
-                currentLabel.classed("inactive", false);
-              }
-            if (i==3)
-              {
-                currentLabel.classed("active", true);
-                currentLabel.classed("inactive", false);
-              }
-          }
-        else
-          {
-            currentLabel.classed("active", false);
-            currentLabel.classed("inactive", true);
-          }
-
-  return currentLabel;
+    });
 }
 
-function populateLabels(labelsGroup,akey){
-  var i=0;
-  Object.keys(Xlabelspair).forEach((key)=>{
-    setLabel(labelsGroup,key,"X",i,akey)
-    i++
-
-   });
-
-Object.keys(Ylabelspair).forEach((key)=>{
-  setLabel(labelsGroup,key,"Y",i,akey)
-  i--
-});
-}
-function getData(){
-
-d3.csv("D3_data_journalism/assets/data/data.csv").then(function(jData) {
-
-  
-
-  jData.forEach(function(data) {
-    data.poverty = +data.poverty;
-    data.healthcare = +data.healthcare;
-    data.age = +data.age;
-    data.income = +data.income;
-    data.smokes = +data.smokes;
-    data.obesity = +data.obesity;
-  });
-});
-return jData;
-}
-function findObject(clickedvalue){
-var i=0;
-Object.keys(labelspair).forEach((key)=>{
-  if(key==clickedvalue){
-    Object.entries(iPair).forEach(([key,value])=>{
-        if (key == i){
-          axisI=value;
-        }
-    })
-  }
-  i++;
-})
-var j=0
-Object.keys(labelspair).forEach((key)=>{
-  if (j==axisI){
-    pairAxis=key;
-  }
-});
-return pairAxis;
-}
-//function onClickNow(labelsGroup,chartGroup){
-//}
+handeBuild(currentX,currentY);
