@@ -43,7 +43,7 @@ function createAxis(chartGroup,xLinearScale,yLinearScale){
 
 }
 
-function updateChart(chartGroup,jData,currentX,currentY,xLinearScale,yLinearScale){
+function updateChartCircles(chartGroup,jData,currentX,currentY,xLinearScale,yLinearScale){
 
     var circlesGroup = chartGroup.selectAll("circle")
     .data(jData)
@@ -171,3 +171,33 @@ function populateLabels(labelsGroup,currentX,currentY){
     
     return pairAxis;
     }
+
+  function updateToolTip(currentX, currentY, circlesGroup) {
+      console.log("Called")
+      var toolTip = d3.tip()
+          .attr("class", "tooltip")
+          .style("background", "black")
+          .style("color", "white")
+          .offset([120, -60])
+          .html(
+           "Hi" 
+          // function(d) {
+             
+          // return (`${d[currentTip]}<hr>${currentX.toUpperCase()} ${d[currentX]}<br>${currentY.toUpperCase()}${d[currentY]}`);
+                
+          // }
+          );
+      
+      circlesGroup.call(toolTip);
+
+      // Create "mouseover" event listener to display tool tip.
+      circlesGroup
+          .on("click", function(data) {
+              toolTip.show(data, this);
+          })
+          .on("mouseout", function(data) {
+              toolTip.hide(data)
+          });
+
+      return circlesGroup;
+  }

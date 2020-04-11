@@ -16,5 +16,6 @@ var width = svgWidth - margin.left - margin.right;
 var currentX="poverty";
 var currentY="healthcare";
 var currentText = "abbr";
+var currentTip="state"
 var chartGroup,labelsGroup,axisI,pairAxis,jData;
 var iPair={0:3,1:4,2:5,3:0,4:1,5:2}

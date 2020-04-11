@@ -20,12 +20,13 @@ function handeBuild(currentX,currentY){
         var yLinearScale=createScale(jData,currentY)
         createAxis(chartGroup,xLinearScale,null);
         createAxis(chartGroup,null,yLinearScale);
-        updateChart(chartGroup,jData,currentX,currentY,xLinearScale,yLinearScale);
+        circlesGroup=updateChartCircles(chartGroup,jData,currentX,currentY,xLinearScale,yLinearScale);
         updateText(chartGroup,jData,currentX,currentY,currentText,xLinearScale,yLinearScale);
         
         var labelsGroup=createLabelsGroup(chartGroup);
         populateLabels(labelsGroup,currentX,currentY)
-        
+        circlesGroup = updateToolTip(currentX, currentY, circlesGroup);
+
         labelsGroup.selectAll("text")
         .on("click", function() {
         var clickedvalue = d3.select(this).attr("value");
