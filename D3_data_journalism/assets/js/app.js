@@ -25,7 +25,7 @@ function handeBuild(currentX,currentY){
         
         var labelsGroup=createLabelsGroup(chartGroup);
         populateLabels(labelsGroup,currentX,currentY)
-        circlesGroup = updateToolTip(currentX, currentY, circlesGroup);
+    
 
         labelsGroup.selectAll("text")
         .on("click", function() {
@@ -50,9 +50,8 @@ function handeBuild(currentX,currentY){
                 }
         })
        
-        //handeBuild(currentX,currentY)        
-        });
 
+    })
     });
 }
 

@@ -56,6 +56,30 @@ function updateChartCircles(chartGroup,jData,currentX,currentY,xLinearScale,yLin
     .attr("stroke-width", "1")
     .attr("stroke", "black")
     .attr("opacity", ".9");
+
+    var toolTip = d3.tip()
+    .attr("class", "tooltip")
+    .offset([60, +60])
+    .html(function(d) {
+    return (`<strong>X: ${d[currentX]}<br><strong>Y: ${d[currentY]}`);
+    });
+
+    chartGroup.call(toolTip);
+
+    circlesGroup.on("mouseover", function(d) {
+      // Show the tooltip
+      //console.log("mo")
+      toolTip.show(d, this);
+      // Highlight the state circle's border
+      d3.select(this).style("stroke", "#2ECCFA");
+    })
+    .on("mouseout", function(d) {
+      // Remove the tooltip
+      //console.log("mf")
+      toolTip.hide(d);
+      // Remove highlight
+      d3.select(this).style("stroke", "#000");
+    });
   
     return circlesGroup
 }
@@ -171,33 +195,3 @@ function populateLabels(labelsGroup,currentX,currentY){
     
     return pairAxis;
     }
-
-  function updateToolTip(currentX, currentY, circlesGroup) {
-      console.log("Called")
-      var toolTip = d3.tip()
-          .attr("class", "tooltip")
-          .style("background", "black")
-          .style("color", "white")
-          .offset([120, -60])
-          .html(
-           "Hi" 
-          // function(d) {
-             
-          // return (`${d[currentTip]}<hr>${currentX.toUpperCase()} ${d[currentX]}<br>${currentY.toUpperCase()}${d[currentY]}`);
-                
-          // }
-          );
-      
-      circlesGroup.call(toolTip);
-
-      // Create "mouseover" event listener to display tool tip.
-      circlesGroup
-          .on("click", function(data) {
-              toolTip.show(data, this);
-          })
-          .on("mouseout", function(data) {
-              toolTip.hide(data)
-          });
-
-      return circlesGroup;
-  }
