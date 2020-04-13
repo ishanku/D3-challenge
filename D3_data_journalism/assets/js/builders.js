@@ -16,7 +16,8 @@ function createScale(jData,axisName)
 {
         var currentLinearScale = d3.scaleLinear()
         .domain([d3.min(jData, d => d[axisName]*0.9),d3.max(jData, d => d[axisName]*1.6)])
-        .range([0, width]);
+        .range([0, width])
+        ;
 
     return currentLinearScale;
 };
@@ -26,6 +27,8 @@ function createAxis(chartGroup,xLinearScale,yLinearScale){
     {
         var xAxis = d3.axisBottom(xLinearScale);
         chartGroup.append("g")
+        .transition()
+        .duration(1000)
         .attr("transform", `translate(0, ${height})`)
         .call(xAxis);
         
@@ -36,6 +39,8 @@ function createAxis(chartGroup,xLinearScale,yLinearScale){
         var yAxis = d3.axisLeft(yLinearScale).ticks(6);;
 
         chartGroup.append("g")
+        .transition()
+        .duration(1000)
         .call(yAxis);
         
         return yAxis;
@@ -47,8 +52,11 @@ function updateChartCircles(chartGroup,jData,currentX,currentY,xLinearScale,yLin
 
     var circlesGroup = chartGroup.selectAll("circle")
     .data(jData)
+    
     .enter()
     .append("circle")
+    //.transition()
+    //.duration(1000)
     .attr("cx", d => xLinearScale(d[currentX]))
     .attr("cy", d => yLinearScale(d[currentY]))
     .attr("r", "10")
@@ -70,15 +78,26 @@ function updateChartCircles(chartGroup,jData,currentX,currentY,xLinearScale,yLin
       // Show the tooltip
       //console.log("mo")
       toolTip.show(d, this);
+      
       // Highlight the state circle's border
-      d3.select(this).style("stroke", "#2ECCFA");
+      d3.select(this)
+      .transition()
+      .duration(50)
+      .style("stroke", "#2ECCFA")
+      .attr("r", 30)
+      .style("fill","pink");
     })
     .on("mouseout", function(d) {
       // Remove the tooltip
       //console.log("mf")
       toolTip.hide(d);
       // Remove highlight
-      d3.select(this).style("stroke", "#000");
+      d3.select(this)
+      .transition()
+      .duration(500)
+      .style("stroke", "#000")
+      .attr("r", 10)
+      .style("fill","gold");
     });
   
     return circlesGroup
@@ -94,7 +113,8 @@ function updateChartCircles(chartGroup,jData,currentX,currentY,xLinearScale,yLin
     .style("font-size", "11px")
     .style("text-anchor", "middle")
     .style('fill', 'black')
-    .attr("opacity", ".5");
+    .attr("opacity", ".5")
+    ;
   
     return TextGroup;
 }
